@@ -181,6 +181,8 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
 
     // The class name ("Sniper", "Kineticist", etc.) lives at this fixed spot in the
     // encounter window's UI tree - there's no semantic name for it, only position.
+    // Infamous mercs show it with an "Infamous " prefix baked into the same text
+    // (e.g. "Infamous Warpriest"), so that's parsed out separately here.
     private static string GetMercenaryClassName(Element window)
     {
         var classElement = window?.Children.ElementAtOrDefault(2)?.Children.ElementAtOrDefault(4)?.Children.ElementAtOrDefault(1);
@@ -188,14 +190,26 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
         return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
     }
 
+    private const string InfamousPrefix = "Infamous ";
+
+    private static (string BaseType, bool IsInfamous) ParseMercType(string rawClassName)
+    {
+        if (string.IsNullOrEmpty(rawClassName)) return (rawClassName, false);
+
+        if (rawClassName.StartsWith(InfamousPrefix, StringComparison.OrdinalIgnoreCase))
+            return (rawClassName[InfamousPrefix.Length..].Trim(), true);
+
+        return (rawClassName, false);
+    }
+
     public override void Render()
     {
         var window = GameController.IngameState.IngameUi.MercenaryEncounterWindow;
         if (window is not { IsVisible: true }) return;
 
-        var mercClassName = GetMercenaryClassName(window);
-        var mercTypeAlertMessage = mercClassName != null
-            ? Settings.MercTypeAlerts.FirstOrDefault(a => a.Enabled && string.Equals(a.Type, mercClassName, StringComparison.OrdinalIgnoreCase))?.Message
+        var (mercType, _) = ParseMercType(GetMercenaryClassName(window));
+        var mercTypeAlertMessage = mercType != null
+            ? Settings.MercTypeAlerts.FirstOrDefault(a => a.Enabled && string.Equals(a.Type, mercType, StringComparison.OrdinalIgnoreCase))?.Message
             : null;
 
         var total = 0f;
