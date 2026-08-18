@@ -49,7 +49,8 @@ An [ExileApi](https://github.com/exApiTools/ExileApi-Compiled) plugin for Path o
 1. Enable the plugin.
 2. Set **League** in settings to your current league's exact poe.ninja name (e.g. `Allflame`).
 3. Prices fetch automatically on load, and again every **Auto Refresh** minutes - or hit **Refresh Prices Now** any time. **Price Status** shows whether the last fetch succeeded and when.
-4. Open a mercenary encounter - a small draggable box appears near the reward window showing the rucksack's total value, any qualifying uniques, and a merc-type alert if one applies.
+4. Set your thresholds: **Minimum Value (c)** is the floor for the rucksack to be worth taking, and **Show Uniques Valued Above (c)** is the floor for a unique to be flagged at all. Both default low, so raise them to match what you'd actually consider worth grabbing.
+5. Open a mercenary encounter - a small draggable box appears near the reward window showing the rucksack's total value, any qualifying uniques, and a merc-type alert if one applies.
 
 ## How the pick-one comparison works
 
