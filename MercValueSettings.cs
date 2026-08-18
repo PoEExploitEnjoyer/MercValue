@@ -37,7 +37,7 @@ public class MercValueSettings : ISettings
     public ColorNode TotalBoxColor { get; set; } = new ColorNode(new Color(0, 0, 0, 150));
 
     [Menu("Show Uniques Valued Above (c)", "Unique items on the mercenary priced at or above this chaos value are flagged in the overlay. Priced using poe.ninja unique weapon/armour/accessory data.")]
-    public RangeNode<int> ShowUniquesValueAbove { get; set; } = new RangeNode<int>(50, 1, 100);
+    public RangeNode<int> ShowUniquesValueAbove { get; set; } = new RangeNode<int>(10, 1, 100);
 
     [Menu("Unique Alert Color", "Text color used to flag a unique item found on the mercenary that meets the value threshold above.")]
     public ColorNode UniqueAlertColor { get; set; } = new ColorNode(new Color(175, 96, 37));
