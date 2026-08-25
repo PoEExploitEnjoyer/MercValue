@@ -10,6 +10,8 @@ An [ExileApi](https://github.com/exApiTools/ExileApi-Compiled) plugin for Path o
 | Rucksack clears the Minimum Value threshold - shown in green and framed. | Rucksack is below the Minimum Value threshold - shown in red, nothing framed. |
 | ![Unique beats rucksack](images/unique-beats-rucksack.png) | ![Merc type alert](images/merc-type-alert.png) |
 | The unique (Kaom's Sign) is worth more than the rucksack and clears its own threshold, so it wins the comparison instead. | A watched mercenary class ("Bladebitter") is detected - its custom alert message appears at the top of the box. |
+| ![Desired and Brick skill marking](images/skill-desired-brick.png) | |
+| This Striker's skills were marked ahead of time in the Striker skills picker (left) - Desired skills are outlined green, and the one Brick skill it rolled (Dual Strike) is outlined red with an X through the icon, so the whole build can be judged at a glance. | |
 
 ## Core Features
 
@@ -18,6 +20,7 @@ An [ExileApi](https://github.com/exApiTools/ExileApi-Compiled) plugin for Path o
 - **Unique detection**: flags any unique on the mercenary priced at or above a threshold you set, individually valued.
 - **Pick-one comparison**: since a mercenary only ever lets you take one reward, the rucksack total and the highest-priced qualifying unique are compared directly - whichever is actually worth taking is shown in green (and framed on screen), the other in red.
 - **Merc Type Alerts**: pick specific mercenary classes (Sniper, Kineticist, etc.) from a dropdown and set a custom reminder message that appears whenever one shows up - e.g. *"Kineticist detected, check skill links"*.
+- **Desired/Brick skill marking**: for any class you've added to Merc Type Alerts, expand its skill picker and mark individual skills as Desired or Brick, using the full skill pool for that class. Whenever that class rolls a marked skill, it's outlined green (Desired) or red with an X through the icon (Brick) directly in the encounter window - so you can judge the whole rolled build at a glance instead of reading every skill name.
 
 ## Install
 
@@ -61,3 +64,12 @@ You can only take one reward from a mercenary, so MercValue treats the rucksack 
 - If neither clears its threshold, neither is highlighted.
 
 Chaos values are rounded half-up for both display and comparison, so a tie in what's shown on screen always favors the rucksack rather than being decided by a fractional difference you can't see.
+
+## How Desired/Brick skill marking works
+
+1. Add a mercenary class under **Merc Type Alerts** (pick it from the dropdown, click Add).
+2. Below the alerts table, that class gets its own expandable **"{Type} skills"** section, listing every skill that class can possibly roll.
+3. Click **Desired** or **Brick** next to a skill to mark it - click the same button again to clear it back to unmarked. Colors for both are configurable (**Desired Skill Color**, **Brick Skill Color**).
+4. Next time that class shows up in an encounter, MercValue reads its actual rolled skills straight from the window and outlines any marked one: green for Desired, red with an X through the icon for Brick. Unmarked skills aren't touched.
+
+Marking is per skill, not per class - a class can have any mix of Desired, Brick, and unmarked skills at once, and the picker remembers your marks across restarts.
