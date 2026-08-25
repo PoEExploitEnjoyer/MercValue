@@ -60,9 +60,17 @@ public class MercValueSettings : ISettings
 
     public List<MercTypeAlertEntry> MercTypeAlerts { get; set; } = new List<MercTypeAlertEntry>();
 
-    [Menu("Merc Type Alerts", "Pick a mercenary class from the dropdown, add it, then customize its message. That message is shown in the overlay whenever a mercenary of that class is encountered.")]
+    [Menu("Merc Type Alerts", "Pick a mercenary class from the dropdown, add it, then customize its message. That message is shown in the overlay whenever a mercenary of that class is encountered. Each added class also gets an expandable skill picker below - mark a skill Desired or Brick and it'll be outlined green or red-with-an-X in the encounter window whenever that class rolls it.")]
     [JsonIgnore]
     public CustomNode MercTypeAlertsPanel { get; set; } = new CustomNode();
+
+    [Menu("Desired Skill Color", "Border color drawn around a merc's skill in the encounter window when you've marked that skill Desired for its class.")]
+    public ColorNode DesiredSkillColor { get; set; } = new ColorNode(Color.Green);
+
+    [Menu("Brick Skill Color", "Border and X color drawn around a merc's skill in the encounter window when you've marked that skill a Brick for its class.")]
+    public ColorNode BrickSkillColor { get; set; } = new ColorNode(Color.Red);
+
+    public List<MercSkillPreference> SkillPreferences { get; set; } = new List<MercSkillPreference>();
 }
 
 public class MercTypeAlertEntry
@@ -70,4 +78,18 @@ public class MercTypeAlertEntry
     public string Type { get; set; } = "";
     public string Message { get; set; } = "";
     public bool Enabled { get; set; } = true;
+}
+
+public enum SkillPreferenceState
+{
+    Unset,
+    Desired,
+    Brick
+}
+
+public class MercSkillPreference
+{
+    public string MercType { get; set; } = "";
+    public string SkillName { get; set; } = "";
+    public SkillPreferenceState State { get; set; } = SkillPreferenceState.Unset;
 }

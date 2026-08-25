@@ -36,6 +36,50 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
         "Thunderquiver", "Toxicologist", "Warpriest", "Winter Deacon", "Withertouch"
     ];
 
+    // Every possible skill each mercenary class can roll, from https://poedb.tw/us/Mercenaries.
+    // A merc's actual encounter only shows a subset of these (confirmed: a live Striker
+    // encounter showed 6 of this list's 12 skills). "Infamous X" entries on poedb are
+    // identical to their base class - not duplicated here, since MercType is already
+    // stripped of the "Infamous " prefix before it's used as a lookup key.
+    private static readonly Dictionary<string, string[]> MercSkillPool = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Bastion"] = ["Shield Crush", "Shield Charge", "Spectral Shield Throw of Trarthus", "Tempest Shield", "Prismplate", "Determination", "Dash", "Intimidating Cry", "Physical Aegis", "Impenetrable Bastion"],
+        ["Blade Ambusher"] = ["Blade Trap", "Trarthan Agility", "Spectral Throw of Trarthus", "Spectral Helix of Trarthus", "Smoke Mine", "Flame Dash", "Grace", "Summon Skitterbots", "Bear Trap"],
+        ["Bladebitter"] = ["Viper Strike", "Abyssal Cry", "Venom Gyre", "Profane Strike", "Cobra Lash", "Pestilent Strike", "Whirling Blades", "Dash", "Malevolence", "Withering Step", "Grace"],
+        ["Bladecaster"] = ["Clutches of the Damned", "Bloody Warp", "Seismic Crush", "Bladefall", "Blade Vortex", "Ethereal Knives", "Bladefall of Trarthus", "Dash", "Grace", "Flame Dash", "Aspect of the Spider", "Frost Shield"],
+        ["Bloodletter"] = ["Bloodthirst", "Blood Mortar", "Lacerate", "Bladestorm", "Perforate", "Leap Slam", "Dash", "Determination", "Oil Slick"],
+        ["Cardinal"] = ["Holy Hammers", "Holy Strike", "Holy Sweep", "Sanctified Strike", "Consecrated Path", "Purity of Lightning", "Flame Dash", "Herald of Purity", "Wrath"],
+        ["Combatant"] = ["Inspiring Cry", "Herald of Ice", "Frost Blades", "Wild Strike", "Spectral Helix", "Static Strike", "Wrath", "Dash", "Frostblink", "Purity of Ice"],
+        ["Cruel Mistress"] = ["Despair", "Void Sphere", "Dark Bargain", "Voltaxic Burst", "Soulrend of Reaping", "Forbidden Rite Totem", "Summon Seeking Void", "Profane Cascade", "Zealotry", "Lightning Warp", "Frostblink", "Flame Dash", "Envy"],
+        ["Earthshaker"] = ["Intimidating Cry", "Leap Slam", "Vaal Ground Slam", "Ground Slam", "Earthquake of Amplification", "Tectonic Cascade", "Sunder of Trarthus", "Determination", "Molten Shell", "Burrow", "Endure", "Vaal Vitality"],
+        ["Eruptor"] = ["Infernal Cry", "Leap Slam", "Triggerslam", "Volcanic Fissure of Snaking", "Consecrated Path", "Tectonic Slam", "Ashen Fissure", "Molten Shell", "Determination", "Purity of Fire", "Herald of Ash", "Flame Link"],
+        ["Fallen Reverend"] = ["Absolution", "Raise Spectre of Transience", "Desecrate", "Reinforce: Fallen Bishop", "Reinforce: Fallen Emperor", "Reinforce: Fallen Osseotitan", "Wrath", "Zealotry", "Battlemage's Cry", "Flame Dash", "Frostblink"],
+        ["Flamehand"] = ["Flame Wall", "Flammability", "Greater Flame Dash", "Flameblast", "Vaal Flameblast", "Fireball", "Fireball of Impact", "Rolling Magma", "Flame Surge", "Lightning Warp", "Frostblink", "Purity of Fire", "Anger", "Flame Aegis"],
+        ["Flamequiver"] = ["Burning Arrow", "Alchemist's Mark", "Vaal Burning Arrow", "Molten Well", "Artillery Ballista", "Explosive Arrow", "Blast Rain of Trarthus", "Conflagration", "Grace", "Blink Arrow", "Dash", "Blasphemy Flammability"],
+        ["Flaming Charlatan"] = ["Holy Flame Totem", "Purifying Flame", "Holy Mortar", "Wave of Conviction of Trarthus", "Scorching Ray Totem", "Meteor", "Lightning Warp", "Flame Dash", "Herald of Ash", "Anger"],
+        ["Frost Ambusher"] = ["Frost Shield", "Greater Vortex Trap", "Ice Trap", "Creeping Frost Trap", "Summon Skitterbots", "Flame Dash", "Frostblink", "Grace", "Arctic Armour", "Vaal Arctic Armour"],
+        ["Frosthand"] = ["Frost Bomb", "Frostbite", "Frost Wall", "Eye of Winter", "Vortex", "Frostbolt", "Ice Nova", "Ice Nova of Projection", "Icestorm", "Lightning Warp", "Frostblink", "Flame Dash", "Purity of Ice", "Discipline"],
+        ["Kineticist"] = ["Elemental Weakness", "Flame Wall", "Kinetic Bolt", "Power Siphon", "Barrage", "Greater Kinetic Blast", "Kinetic Blast of Clustering", "Kinetic Rain of Impact", "Flame Dash", "Frostblink", "Haste", "Inspiring Cry"],
+        ["Manyshot"] = ["Ice Shot", "Vaal Grace", "Vaal Ice Shot", "Frigid Forkshot", "Icicle Rain", "Mirror Arrow", "Hatred", "Frost Bomb", "Grace", "Dash", "Blink Arrow"],
+        ["Mysterious Diver"] = ["Elemental Hit of Ice", "Frost Bomb", "Frost Blades", "Wild Strike", "Herald of Ice", "Hatred", "Purity of Ice", "Frostblink", "Dash"],
+        ["Reanimator"] = ["Raise Zombie of Gigantism", "Desecrate", "Raise Zombie of Falling", "Summon Skeletons", "Flesh Offering", "Bone Offering", "Summon Raging Spirit", "Lightning Warp", "Frostblink", "Flame Dash", "Blasphemy Enfeeble", "Relic of Binding"],
+        ["Ripper"] = ["Tunnelslam", "Enrage", "Cleave", "Vaal Cleave", "Slicing Wind", "Chain Hook of Trarthus", "Leap Slam of Groundbreaking", "Molten Shell", "Determination", "Leap Slam", "Vitality"],
+        ["Sanguimancer"] = ["Boiling Blood", "Storm Call of Trarthus", "Bodyswap", "Exsanguinate", "Vaal Reap", "Reap", "Corrupted Blade Vortex of the Scythe", "Flame Dash", "Lightning Warp", "Pride", "Proximity Shield", "Vaal Vitality"],
+        ["Shattersword"] = ["Call of Steel", "Rallying Cry", "Triggerblades", "Shattering Steel", "Splitting Steel", "Lancing Steel", "Dash", "Whirling Blades", "Grace", "Brutal Teachings"],
+        ["Shock Ambusher"] = ["Conductivity", "Vaal Lightning Trap", "Lightning Trap", "Lightning Spire Trap", "Ball Lightning of Orbiting Trap", "Lightning Warp Trap", "Flame Dash", "Frostblink", "Smoke Mine", "Summon Skitterbots", "Zealotry"],
+        ["Smoulderstrike"] = ["Punishment", "Inflame", "Vaal Molten Strike", "Infernal Blow of Immolation", "Molten Strike", "Flamebolt Strike", "Anger", "Leap Slam", "Molten Shell", "Flame Aegis", "Infernal Cry"],
+        ["Sniper"] = ["Ensnaring Arrow", "Poacher's Mark", "Greater Split Arrow", "Rain of Arrows of Saturation", "Tornado Shot", "Shrapnel Ballista", "Barrage of Volley Fire", "Siege Ballista of Trarthus", "Split Arrow", "Puncture", "Grace", "Blink Arrow", "Dash", "Frenzy", "Haste"],
+        ["Storming Zealot"] = ["Unnerving Blast", "Wave of Conviction", "Divine Ire", "Tornado of Elemental Turbulence", "Divine Retribution", "Shockwave Totem of Shocking", "Charged Dash of the Arcane", "Wrath", "Lightning Warp", "Flame Dash"],
+        ["Stormhand"] = ["Conductivity", "Sigil of Power", "Spark", "Arc", "Ball Lightning of Static", "Greater Stormcall", "Greater Shock Nova", "Orb of Storms", "Stormcall", "Lightning Warp", "Frostblink", "Flame Dash", "Wrath", "Purity of Lightning", "Proximity Shield"],
+        ["Striker"] = ["Vigilant Strike", "Enduring Cry", "Physical Aegis", "Heavy Strike of Vulnerability", "Boneshatter", "Dual Strike", "Determination", "Leap Slam", "Molten Shell", "Vitality", "Vaal Ancestral Warchief", "Decoy Totem"],
+        ["Swiftblade"] = ["Cyclone of the Empire", "Rallying Cry", "Triggerblades", "Flicker Strike", "Vaal Double Strike", "Pride", "Leap Slam", "Incite", "Dash", "Steelskin Ally"],
+        ["Thunderquiver"] = ["Lightning Arrow", "Assassin's Mark", "Galvanic Arrow", "Greater Lightning Arrow", "Vaal Lightning Arrow", "Storm Rain", "Wrath", "Blink Arrow", "Trarthan Agility", "Precision", "Dash"],
+        ["Toxicologist"] = ["Withering Step", "Chaotic Burst", "Chaotic Shot", "Vaal Caustic Arrow", "Toxic Rain", "Scourge Arrow of Menace", "Caustic Arrow", "Grace", "Blink Arrow", "Dash", "Malevolence", "Trarthan Agility"],
+        ["Warpriest"] = ["Holy Relic", "Smite", "Beacons of Faith", "Dominating Blow", "Raise Spectre: Holy Flame Elementals", "Touch of God", "Purity of Lightning", "Flame Dash", "Herald of Purity"],
+        ["Winter Deacon"] = ["Frost Shield", "Vaal Glacial Hammer", "Ice Crash", "Glacial Hammer", "Earthquake of Winter", "Heavy Strike of Trarthus", "Hatred", "Frostblink", "Frost Bomb", "Arctic Armour", "Purity of Ice"],
+        ["Withertouch"] = ["Bane", "Temporal Chains", "Greater Soulrend", "Scourstorm", "Blight", "Essence Drain of Wickedness", "Altar of Chaos", "Malevolence", "Lightning Warp", "Frostblink", "Flame Dash", "Clarity", "Withering Step", "Wither Totem"],
+    };
+
     private Dictionary<string, float> _priceByName = new(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, float> _uniquePriceByName = new(StringComparer.OrdinalIgnoreCase);
     private bool _isFetchingPrices;
@@ -171,6 +215,68 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
             Settings.MercTypeAlerts.Remove(toRemove);
 
         ImGui.EndTable();
+
+        // One expandable skill picker per added merc type - outside the table above since
+        // ImGui tables don't handle variable-height per-row content well. Skill list comes
+        // from MercSkillPool (poedb.tw/us/Mercenaries); Unknown for a type not in that map
+        // shouldn't happen since MercTypes and MercSkillPool are meant to stay in sync.
+        foreach (var alert in Settings.MercTypeAlerts)
+        {
+            if (!MercSkillPool.TryGetValue(alert.Type, out var skills)) continue;
+
+            ImGui.PushID(alert.Type);
+            if (ImGui.CollapsingHeader($"{alert.Type} skills##skills"))
+            {
+                foreach (var skill in skills)
+                {
+                    ImGui.PushID(skill);
+                    var state = GetSkillPreference(alert.Type, skill);
+                    ImGui.TextUnformatted(skill);
+                    ImGui.SameLine(260);
+
+                    var desiredActive = state == SkillPreferenceState.Desired;
+                    if (desiredActive) ImGui.PushStyleColor(ImGuiCol.Button, ToImGuiColor(Settings.DesiredSkillColor));
+                    if (ImGui.Button("Desired"))
+                        SetSkillPreference(alert.Type, skill, desiredActive ? SkillPreferenceState.Unset : SkillPreferenceState.Desired);
+                    if (desiredActive) ImGui.PopStyleColor();
+
+                    ImGui.SameLine();
+
+                    var brickActive = state == SkillPreferenceState.Brick;
+                    if (brickActive) ImGui.PushStyleColor(ImGuiCol.Button, ToImGuiColor(Settings.BrickSkillColor));
+                    if (ImGui.Button("Brick"))
+                        SetSkillPreference(alert.Type, skill, brickActive ? SkillPreferenceState.Unset : SkillPreferenceState.Brick);
+                    if (brickActive) ImGui.PopStyleColor();
+
+                    ImGui.PopID();
+                }
+            }
+            ImGui.PopID();
+        }
+    }
+
+    private SkillPreferenceState GetSkillPreference(string mercType, string skill)
+    {
+        var entry = Settings.SkillPreferences.FirstOrDefault(p =>
+            string.Equals(p.MercType, mercType, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(p.SkillName, skill, StringComparison.OrdinalIgnoreCase));
+        return entry?.State ?? SkillPreferenceState.Unset;
+    }
+
+    private void SetSkillPreference(string mercType, string skill, SkillPreferenceState state)
+    {
+        var entry = Settings.SkillPreferences.FirstOrDefault(p =>
+            string.Equals(p.MercType, mercType, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(p.SkillName, skill, StringComparison.OrdinalIgnoreCase));
+
+        if (state == SkillPreferenceState.Unset)
+        {
+            if (entry != null) Settings.SkillPreferences.Remove(entry);
+            return;
+        }
+
+        if (entry != null) entry.State = state;
+        else Settings.SkillPreferences.Add(new MercSkillPreference { MercType = mercType, SkillName = skill, State = state });
     }
 
     public override Job Tick()
@@ -188,6 +294,36 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
         var classElement = window?.Children.ElementAtOrDefault(2)?.Children.ElementAtOrDefault(4)?.Children.ElementAtOrDefault(1);
         var text = classElement?.TextNoTags;
         return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+    }
+
+    // The merc's rolled skill list (a subset of MercSkillPool for its class) - found by
+    // dumping the encounter window's UI element tree: window.2.10.0.1.0.{row}.1 holds each
+    // skill's name text, same fixed-position approach as the class name lookup above.
+    // Returns both the whole row (icon + name + description, used for the border) and just
+    // the icon's rect (used for the Brick X) - there's no separate icon element in the
+    // window tree, so the icon rect is derived as the gap between the row's own left edge
+    // and where the name text starts, which lined up consistently (~83px) across every
+    // skill row in the sample dump.
+    private static List<(string Name, RectangleF RowRect, RectangleF IconRect)> GetMercenarySkills(Element window)
+    {
+        var result = new List<(string, RectangleF, RectangleF)>();
+        var container = window?.Children.ElementAtOrDefault(2)?.Children.ElementAtOrDefault(10)
+            ?.Children.ElementAtOrDefault(0)?.Children.ElementAtOrDefault(1)?.Children.ElementAtOrDefault(0);
+        if (container == null) return result;
+
+        foreach (var row in container.Children)
+        {
+            var textElement = row?.Children.ElementAtOrDefault(1);
+            var text = textElement?.TextNoTags;
+            if (string.IsNullOrWhiteSpace(text)) continue;
+
+            var rowRect = row.GetClientRectCache;
+            var textRect = textElement.GetClientRectCache;
+            var iconWidth = Math.Max(0, textRect.X - rowRect.X);
+            var iconRect = new RectangleF(rowRect.X, rowRect.Y, iconWidth, rowRect.Height);
+            result.Add((text.Trim(), rowRect, iconRect));
+        }
+        return result;
     }
 
     private const string InfamousPrefix = "Infamous ";
@@ -265,6 +401,30 @@ public class MercValue : BaseSettingsPlugin<MercValueSettings>
         if (currencyInventoryRect.HasValue && currencyMeetsBar)
         {
             Graphics.DrawFrame(currencyInventoryRect.Value, Settings.MeetsMinimumColor, HighlightFrameThickness);
+        }
+
+        if (mercType != null)
+        {
+            foreach (var (skillName, rowRect, iconRect) in GetMercenarySkills(window))
+            {
+                var state = GetSkillPreference(mercType, skillName);
+                if (state == SkillPreferenceState.Unset) continue;
+
+                if (state == SkillPreferenceState.Desired)
+                {
+                    Graphics.DrawFrame(rowRect, Settings.DesiredSkillColor, HighlightFrameThickness);
+                }
+                else
+                {
+                    Graphics.DrawFrame(rowRect, Settings.BrickSkillColor, HighlightFrameThickness);
+                    var topLeft = new Vector2(iconRect.X, iconRect.Y);
+                    var topRight = new Vector2(iconRect.X + iconRect.Width, iconRect.Y);
+                    var bottomLeft = new Vector2(iconRect.X, iconRect.Y + iconRect.Height);
+                    var bottomRight = new Vector2(iconRect.X + iconRect.Width, iconRect.Y + iconRect.Height);
+                    Graphics.DrawLine(topLeft, bottomRight, HighlightFrameThickness, Settings.BrickSkillColor);
+                    Graphics.DrawLine(topRight, bottomLeft, HighlightFrameThickness, Settings.BrickSkillColor);
+                }
+            }
         }
     }
 
